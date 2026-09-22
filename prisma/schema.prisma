@@ -1,0 +1,103 @@
+// SiteCommande — schéma de base de données
+// Dev : SQLite. Production : changer provider en "postgresql" et adapter DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Rôles : "VENDOR" | "ADMIN"
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         String    @default("VENDOR")
+  createdAt    DateTime  @default(now())
+
+  shop         Shop?
+  payments     Payment[]
+}
+
+model Shop {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  name         String
+  slug         String    @unique
+  description  String?
+  logoUrl      String?
+  contactPhone String
+  whatsapp     String?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products     Product[]
+
+  @@index([slug])
+}
+
+// Statut article : "DRAFT" | "PENDING_PAYMENT" | "PUBLISHED"
+model Product {
+  id          String    @id @default(cuid())
+  shopId      String
+  title       String
+  slug        String
+  description String?
+  price       Int                     // prix affiché au client, en F CFA (entier)
+  images      String    @default("[]") // JSON: tableau d'URLs d'images
+  status      String    @default("DRAFT")
+  isFreeSlot  Boolean   @default(false) // true si publié via le crédit gratuit
+  createdAt   DateTime  @default(now())
+
+  shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  orders      Order[]
+  payments    Payment[]
+
+  @@unique([shopId, slug])
+  @@index([status])
+}
+
+// Statut commande : "NEW" | "CONTACTED" | "CONFIRMED" | "CANCELLED"
+model Order {
+  id              String    @id @default(cuid())
+  productId       String
+  customerName    String
+  customerPhone   String
+  customerAddress String?
+  quantity        Int       @default(1)
+  note            String?
+  status          String    @default("NEW")
+  createdAt       DateTime  @default(now())
+
+  product         Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([status])
+}
+
+// Statut paiement : "PENDING" | "PAID" | "FAILED" | "CANCELLED"
+model Payment {
+  id          String    @id @default(cuid())
+  userId      String
+  productId   String
+  amount      Int
+  currency    String    @default("XOF")
+  provider    String
+  providerRef String?
+  checkoutUrl String?
+  status      String    @default("PENDING")
+  createdAt   DateTime  @default(now())
+  paidAt      DateTime?
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([providerRef])
+}

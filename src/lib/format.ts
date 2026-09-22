@@ -1,0 +1,40 @@
+// Utilitaires de formatage et de slug.
+
+export function formatFCFA(amount: number): string {
+  const n = Math.round(amount || 0);
+  const grouped = n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return `${grouped} F CFA`;
+}
+
+export function formatDate(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return d.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export function slugify(input: string): string {
+  return input
+    .toString()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // enlève les accents
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "boutique";
+}
+
+export function parseImages(json: string | null | undefined): string[] {
+  if (!json) return [];
+  try {
+    const arr = JSON.parse(json);
+    return Array.isArray(arr) ? arr.filter((x) => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
