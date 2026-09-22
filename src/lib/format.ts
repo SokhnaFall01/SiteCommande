@@ -38,3 +38,9 @@ export function parseImages(json: string | null | undefined): string[] {
     return [];
   }
 }
+
+// Une source d'image valide est soit une URL http(s), soit un fichier uploadé
+// servi sous /uploads/.
+export function isValidImageSrc(src: string): boolean {
+  return /^https?:\/\//i.test(src) || /^\/uploads\/[\w.\-]+$/.test(src);
+}

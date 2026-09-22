@@ -7,6 +7,11 @@ export const config = {
   devise: process.env.DEVISE || "XOF",
   prixPublication: parseInt(process.env.PRIX_PUBLICATION || "300", 10),
   paymentProvider: (process.env.PAYMENT_PROVIDER || "mock").toLowerCase(),
+  uploads: {
+    maxPhotos: 3, // nombre maximum de photos par article
+    maxFileMb: parseInt(process.env.MAX_UPLOAD_MB || "3", 10), // taille max par fichier
+    allowedTypes: ["image/jpeg", "image/png", "image/webp"],
+  },
   admin: {
     email: process.env.ADMIN_EMAIL || "admin@sitecommande.sn",
     password: process.env.ADMIN_PASSWORD || "changeMoi123",

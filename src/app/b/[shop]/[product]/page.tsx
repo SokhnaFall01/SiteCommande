@@ -37,12 +37,13 @@ export default async function PublicProductPage({
   if (!data) notFound();
   const { shop, product } = data;
   const images = parseImages(product.images);
+  const color = shop.primaryColor || "#0c9051";
 
   return (
     <div className="min-h-screen">
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-4xl px-4 py-4">
-          <Link href={`/b/${shop.slug}`} className="font-bold text-brand-700">
+          <Link href={`/b/${shop.slug}`} className="font-bold" style={{ color }}>
             {shop.name}
           </Link>
         </div>
@@ -81,7 +82,7 @@ export default async function PublicProductPage({
             )}
 
             <h1 className="mt-5 text-2xl font-bold">{product.title}</h1>
-            <p className="mt-2 text-2xl font-extrabold text-brand-700">
+            <p className="mt-2 text-2xl font-extrabold" style={{ color }}>
               {formatFCFA(product.price)}
             </p>
             {product.description && (
@@ -93,7 +94,7 @@ export default async function PublicProductPage({
 
           {/* Formulaire de commande */}
           <div>
-            <OrderForm productId={product.id} />
+            <OrderForm productId={product.id} color={color} />
           </div>
         </div>
       </main>

@@ -31,6 +31,8 @@ model Shop {
   slug         String    @unique
   description  String?
   logoUrl      String?
+  bannerUrl    String?
+  primaryColor String    @default("#0c9051")
   contactPhone String
   whatsapp     String?
   isActive     Boolean   @default(true)

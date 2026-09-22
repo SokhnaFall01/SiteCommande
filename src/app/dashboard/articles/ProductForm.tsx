@@ -6,6 +6,7 @@ import {
   updateProductAction,
 } from "@/actions/products";
 import { SubmitButton } from "@/components/SubmitButton";
+import { ImageUploader } from "@/components/ImageUploader";
 
 type Product = {
   id: string;
@@ -80,20 +81,16 @@ export function ProductForm({ product }: { product?: Product }) {
       </div>
 
       <div>
-        <label className="label" htmlFor="images">
-          Photos <span className="text-gray-400">(liens, un par ligne)</span>
+        <label className="label">
+          Photos <span className="text-gray-400">(3 maximum)</span>
         </label>
-        <textarea
-          id="images"
+        <ImageUploader
           name="images"
-          rows={3}
-          className="input"
-          defaultValue={(product?.images || []).join("\n")}
-          placeholder="https://exemple.com/photo1.jpg"
+          max={3}
+          initial={product?.images || []}
+          maxDim={1280}
+          aspect="square"
         />
-        <p className="mt-1 text-xs text-gray-500">
-          Collez les liens de vos images (jusqu&apos;à 6).
-        </p>
       </div>
 
       <SubmitButton className="btn-primary">

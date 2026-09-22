@@ -35,10 +35,22 @@ export default async function PublicShopPage({
 }) {
   const shop = await getShop(params.shop);
   if (!shop) notFound();
+  const color = shop.primaryColor || "#0c9051";
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-gray-200 bg-white">
+      {shop.bannerUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={shop.bannerUrl}
+          alt=""
+          className="h-40 w-full object-cover sm:h-56"
+        />
+      )}
+      <header
+        className="border-b border-gray-200 bg-white"
+        style={{ borderTop: `4px solid ${color}` }}
+      >
         <div className="mx-auto max-w-4xl px-4 py-6">
           <div className="flex items-center gap-4">
             {shop.logoUrl && (
@@ -87,7 +99,7 @@ export default async function PublicShopPage({
                     </div>
                   )}
                   <h3 className="font-semibold">{p.title}</h3>
-                  <p className="mt-1 font-bold text-brand-700">
+                  <p className="mt-1 font-bold" style={{ color }}>
                     {formatFCFA(p.price)}
                   </p>
                 </Link>

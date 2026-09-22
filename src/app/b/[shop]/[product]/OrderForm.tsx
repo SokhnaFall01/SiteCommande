@@ -4,14 +4,22 @@ import { useFormState } from "react-dom";
 import { createOrderAction } from "@/actions/orders";
 import { SubmitButton } from "@/components/SubmitButton";
 
-export function OrderForm({ productId }: { productId: string }) {
+export function OrderForm({
+  productId,
+  color = "#0c9051",
+}: {
+  productId: string;
+  color?: string;
+}) {
   const [state, formAction] = useFormState(createOrderAction, undefined);
 
   if (state?.success) {
     return (
-      <div className="card border-brand-200 bg-brand-50">
-        <h3 className="font-semibold text-brand-900">Commande envoyée ✅</h3>
-        <p className="mt-1 text-sm text-brand-800">{state.success}</p>
+      <div className="card" style={{ borderColor: color }}>
+        <h3 className="font-semibold" style={{ color }}>
+          Commande envoyée ✅
+        </h3>
+        <p className="mt-1 text-sm text-gray-700">{state.success}</p>
       </div>
     );
   }
@@ -71,7 +79,12 @@ export function OrderForm({ productId }: { productId: string }) {
         <textarea id="note" name="note" rows={2} className="input" />
       </div>
 
-      <SubmitButton className="btn-primary w-full">Envoyer la commande</SubmitButton>
+      <SubmitButton
+        className="btn w-full text-white hover:opacity-90"
+        style={{ backgroundColor: color }}
+      >
+        Envoyer la commande
+      </SubmitButton>
       <p className="text-center text-xs text-gray-500">
         Aucun paiement en ligne — le vendeur vous contactera.
       </p>

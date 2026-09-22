@@ -4,16 +4,28 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/auth";
-import { slugify } from "@/lib/format";
+import { slugify, isValidImageSrc } from "@/lib/format";
 
 export type FormState = { error?: string; success?: string } | undefined;
+
+const imageField = z
+  .string()
+  .optional()
+  .transform((v) => (v || "").split("\n")[0].trim())
+  .refine((v) => v === "" || isValidImageSrc(v), "Image invalide");
 
 const shopSchema = z.object({
   name: z.string().min(2, "Nom de la boutique trop court"),
   description: z.string().optional(),
   contactPhone: z.string().min(6, "Téléphone de contact requis"),
   whatsapp: z.string().optional(),
-  logoUrl: z.string().url("Lien de logo invalide").optional().or(z.literal("")),
+  logoUrl: imageField,
+  bannerUrl: imageField,
+  primaryColor: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/, "Couleur invalide")
+    .optional()
+    .or(z.literal("")),
 });
 
 async function uniqueShopSlug(base: string, ignoreId?: string): Promise<string> {
@@ -39,6 +51,8 @@ export async function saveShopAction(
     contactPhone: formData.get("contactPhone"),
     whatsapp: formData.get("whatsapp") || undefined,
     logoUrl: formData.get("logoUrl") || "",
+    bannerUrl: formData.get("bannerUrl") || "",
+    primaryColor: formData.get("primaryColor") || "",
   });
 
   if (!parsed.success) {
@@ -46,6 +60,7 @@ export async function saveShopAction(
   }
 
   const data = parsed.data;
+  const primaryColor = data.primaryColor || "#0c9051";
   const existing = await prisma.shop.findUnique({ where: { userId: user.id } });
 
   if (existing) {
@@ -57,6 +72,8 @@ export async function saveShopAction(
         contactPhone: data.contactPhone.trim(),
         whatsapp: data.whatsapp?.trim() || null,
         logoUrl: data.logoUrl || null,
+        bannerUrl: data.bannerUrl || null,
+        primaryColor,
       },
     });
   } else {
@@ -70,6 +87,8 @@ export async function saveShopAction(
         contactPhone: data.contactPhone.trim(),
         whatsapp: data.whatsapp?.trim() || null,
         logoUrl: data.logoUrl || null,
+        bannerUrl: data.bannerUrl || null,
+        primaryColor,
       },
     });
   }

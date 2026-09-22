@@ -9,6 +9,7 @@ import { config } from "@/lib/config";
 import { slugify } from "@/lib/format";
 import { getPaymentProvider } from "@/lib/payment";
 import { publicationPaidEmail, sendMail } from "@/lib/mailer";
+import { isValidImageSrc } from "@/lib/format";
 
 export type FormState = { error?: string; success?: string } | undefined;
 
@@ -24,8 +25,8 @@ function parseImageList(raw?: string): string[] {
   return raw
     .split(/[\n,]+/)
     .map((s) => s.trim())
-    .filter((s) => /^https?:\/\//i.test(s))
-    .slice(0, 6);
+    .filter((s) => isValidImageSrc(s))
+    .slice(0, config.uploads.maxPhotos);
 }
 
 async function uniqueProductSlug(

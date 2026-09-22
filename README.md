@@ -18,6 +18,9 @@ Voir [`SPEC.md`](./SPEC.md) pour la spécification détaillée.
 - Emails via **SMTP** (Nodemailer) — s'affichent dans la console si non configuré
 - Paiement mobile money via **PayDunya** (Wave / Orange Money / Free Money),
   avec un mode **mock** pour tester sans argent réel
+- **Upload de photos** (jusqu'à 3 par article, redimensionnées côté client et
+  limitées en taille), stockées dans `public/uploads/`
+- **Personnalisation de la boutique** : logo, bannière et couleur principale
 
 ## Démarrage rapide (développement)
 
