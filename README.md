@@ -58,7 +58,14 @@ en **Publié** sans transaction réelle.
 2. **Paiement réel** : créez un compte marchand [PayDunya](https://paydunya.com),
    mettez `PAYMENT_PROVIDER=paydunya`, `PAYDUNYA_MODE=live` et remplissez les clés
    API dans `.env`.
-3. **Emails** : renseignez les variables `SMTP_*` (ex. Brevo).
+3. **Emails (Gmail)** : les notifications de commande partent par Gmail.
+   - Activez la **validation en 2 étapes** sur le compte Google.
+   - Créez un **mot de passe d'application** : https://myaccount.google.com/apppasswords
+   - Dans `.env` : `SMTP_USER` = votre adresse Gmail, `SMTP_PASSWORD` = le mot
+     de passe d'application (16 caractères). `SMTP_HOST` et `SMTP_PORT` sont déjà
+     réglés sur `smtp.gmail.com` / `587`.
+   - Tant que ces variables sont vides, les emails s'affichent dans la console
+     (pratique en développement).
 4. **APP_URL** : mettez l'URL publique réelle (pour les liens et le webhook).
 5. **Build** : `npm run build && npm run start`.
 

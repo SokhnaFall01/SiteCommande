@@ -12,15 +12,17 @@ type MailInput = {
 let transporter: nodemailer.Transporter | null = null;
 
 function getTransporter(): nodemailer.Transporter | null {
-  if (!config.smtp.host) return null;
+  // Tant qu'aucun compte (identifiant + mot de passe) n'est configuré,
+  // on reste en mode console (repli de développement).
+  if (!config.smtp.host || !config.smtp.user || !config.smtp.password) {
+    return null;
+  }
   if (transporter) return transporter;
   transporter = nodemailer.createTransport({
     host: config.smtp.host,
     port: config.smtp.port,
-    secure: config.smtp.port === 465,
-    auth: config.smtp.user
-      ? { user: config.smtp.user, pass: config.smtp.password }
-      : undefined,
+    secure: config.smtp.port === 465, // 465 = SSL, 587 = STARTTLS (Gmail)
+    auth: { user: config.smtp.user, pass: config.smtp.password },
   });
   return transporter;
 }

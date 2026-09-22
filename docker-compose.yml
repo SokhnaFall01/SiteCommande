@@ -23,6 +23,12 @@ services:
       PAYMENT_PROVIDER: "${PAYMENT_PROVIDER:-mock}"
       PRIX_PUBLICATION: "${PRIX_PUBLICATION:-300}"
       DEVISE: "${DEVISE:-XOF}"
+      # Emails via Gmail (voir .env / README)
+      SMTP_HOST: "${SMTP_HOST:-smtp.gmail.com}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
+      SMTP_FROM: "${SMTP_FROM:-}"
     ports:
       - "3000:3000"
     volumes:

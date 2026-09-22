@@ -24,10 +24,17 @@ export const config = {
     token: process.env.PAYDUNYA_TOKEN || "",
   },
   smtp: {
-    host: process.env.SMTP_HOST || "",
+    // Par défaut : Gmail (smtp.gmail.com). Remplaçable via les variables d'env.
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
     port: parseInt(process.env.SMTP_PORT || "587", 10),
     user: process.env.SMTP_USER || "",
     password: process.env.SMTP_PASSWORD || "",
-    from: process.env.SMTP_FROM || "SiteCommande <no-reply@sitecommande.sn>",
+    // Gmail exige que l'expéditeur corresponde au compte authentifié :
+    // si SMTP_FROM n'est pas défini, on utilise l'adresse Gmail (SMTP_USER).
+    from:
+      process.env.SMTP_FROM ||
+      (process.env.SMTP_USER
+        ? `SiteCommande <${process.env.SMTP_USER}>`
+        : "SiteCommande <no-reply@sitecommande.sn>"),
   },
 };
