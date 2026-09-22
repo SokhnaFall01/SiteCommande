@@ -53,8 +53,13 @@ en **Publié** sans transaction réelle.
 
 ## Passer en production
 
-1. **Base de données** : dans `prisma/schema.prisma`, mettez
-   `provider = "postgresql"` et renseignez `DATABASE_URL`. Puis `npm run db:push`.
+> 📘 **Guide de déploiement pas à pas** (serveur avec reverse proxy + sous-domaine) :
+> voir [`docs/DEPLOIEMENT.md`](./docs/DEPLOIEMENT.md).
+
+1. **Base de données** : SQLite par défaut (fichier sur un volume) — simple et
+   suffisant pour démarrer, un seul conteneur. Pour passer à PostgreSQL plus tard,
+   mettez `provider = "postgresql"` dans `prisma/schema.prisma` et renseignez
+   `DATABASE_URL`, puis `npm run db:push`.
 2. **Paiement réel** : créez un compte marchand [PayDunya](https://paydunya.com),
    mettez `PAYMENT_PROVIDER=paydunya`, `PAYDUNYA_MODE=live` et remplissez les clés
    API dans `.env`.
@@ -69,12 +74,18 @@ en **Publié** sans transaction réelle.
 4. **APP_URL** : mettez l'URL publique réelle (pour les liens et le webhook).
 5. **Build** : `npm run build && npm run start`.
 
-### Avec Docker
+### Avec Docker (recommandé)
+
+Un seul conteneur (SQLite + volumes pour la base et les photos), exposé en local
+sur `127.0.0.1:${APP_PORT:-3001}` pour être placé derrière votre reverse proxy.
 
 ```bash
-cp .env.example .env   # puis éditez
+cp .env.example .env   # puis éditez (APP_URL, APP_PORT, secrets…)
 docker compose up -d --build
 ```
+
+La base et le compte admin sont créés automatiquement au démarrage.
+Détails (DNS, Nginx/Caddy/Traefik, HTTPS, sauvegardes) : [`docs/DEPLOIEMENT.md`](./docs/DEPLOIEMENT.md).
 
 ## Structure
 

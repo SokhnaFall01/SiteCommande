@@ -1,39 +1,26 @@
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: sitecommande
-      POSTGRES_PASSWORD: sitecommande
-      POSTGRES_DB: sitecommande
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
   app:
     build: .
     restart: unless-stopped
-    depends_on:
-      - db
+    # Variables lues depuis le fichier .env (APP_URL, SESSION_SECRET, SMTP_*,
+    # PAYDUNYA_*, PAYMENT_PROVIDER, etc.)
+    env_file: .env
     environment:
-      DATABASE_URL: "postgresql://sitecommande:sitecommande@db:5432/sitecommande"
-      APP_URL: "${APP_URL:-http://localhost:3000}"
-      SESSION_SECRET: "${SESSION_SECRET:-change-me-please-32-chars-minimum-value}"
-      PAYMENT_PROVIDER: "${PAYMENT_PROVIDER:-mock}"
-      PRIX_PUBLICATION: "${PRIX_PUBLICATION:-300}"
-      DEVISE: "${DEVISE:-XOF}"
-      # Emails via Gmail (voir .env / README)
-      SMTP_HOST: "${SMTP_HOST:-smtp.gmail.com}"
-      SMTP_PORT: "${SMTP_PORT:-587}"
-      SMTP_USER: "${SMTP_USER:-}"
-      SMTP_PASSWORD: "${SMTP_PASSWORD:-}"
-      SMTP_FROM: "${SMTP_FROM:-}"
-    ports:
-      - "3000:3000"
+      NODE_ENV: "production"
+      # Base SQLite stockée sur un volume persistant
+      DATABASE_URL: "file:/app/data/prod.db"
     volumes:
-      # Persiste les photos uploadées entre les redémarrages du conteneur
-      - uploads_data:/app/public/uploads
+      - db_data:/app/data                 # base de données SQLite
+      - uploads_data:/app/public/uploads  # photos uploadées
+    # Au démarrage : crée/MAJ les tables, crée l'admin si absent, puis lance l'app
+    command: >
+      sh -c "npx prisma db push --skip-generate &&
+             npx tsx prisma/seed.ts &&
+             npm run start"
+    # Exposé UNIQUEMENT en local : seul le reverse proxy du serveur y accède.
+    # Change APP_PORT dans .env si 3001 est déjà pris par un autre conteneur.
+    ports:
+      - "127.0.0.1:${APP_PORT:-3001}:3000"
 
 volumes:
   db_data:
