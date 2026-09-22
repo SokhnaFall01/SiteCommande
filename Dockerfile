@@ -1,13 +1,19 @@
 # --- Étape build ---
 FROM node:22-alpine AS builder
+# OpenSSL + libc6-compat requis par les moteurs Prisma sur Alpine
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci || npm install
+# --ignore-scripts : n'exécute PAS "postinstall" (prisma generate) maintenant,
+# car le schéma n'est copié qu'ensuite. La génération se fait dans "npm run build".
+RUN npm ci --ignore-scripts || npm install --ignore-scripts
 COPY . .
-RUN npx prisma generate && npm run build
+# "npm run build" fait "prisma generate && next build"
+RUN npm run build
 
 # --- Étape run ---
 FROM node:22-alpine AS runner
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/package.json ./package.json

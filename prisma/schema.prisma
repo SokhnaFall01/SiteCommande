@@ -2,7 +2,9 @@
 // Dev : SQLite. Production : changer provider en "postgresql" et adapter DATABASE_URL.
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // "native" pour le développement local, la cible musl pour l'image Docker Alpine
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
