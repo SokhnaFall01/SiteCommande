@@ -99,8 +99,15 @@ export default async function PublicShopPage({
                     </div>
                   )}
                   <h3 className="font-semibold">{p.title}</h3>
-                  <p className="mt-1 font-bold" style={{ color }}>
-                    {formatFCFA(p.price)}
+                  <p className="mt-1 flex items-baseline gap-2">
+                    <span className="font-bold" style={{ color }}>
+                      {formatFCFA(p.price)}
+                    </span>
+                    {p.oldPrice && p.oldPrice > p.price && (
+                      <span className="text-sm text-gray-400 line-through">
+                        {formatFCFA(p.oldPrice)}
+                      </span>
+                    )}
                   </p>
                 </Link>
               );

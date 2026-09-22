@@ -11,6 +11,10 @@ import {
 import { ProductForm } from "../ProductForm";
 import { ProductStatusBadge } from "@/components/badges";
 import { CopyLink } from "@/components/CopyLink";
+import { Stars } from "@/components/Stars";
+import { AddReviewForm } from "./AddReviewForm";
+import { moderateReviewAction } from "@/actions/reviews";
+import { formatDate } from "@/lib/format";
 
 export default async function ArticleDetailPage({
   params,
@@ -25,8 +29,12 @@ export default async function ArticleDetailPage({
 
   const product = await prisma.product.findUnique({
     where: { id: params.id },
+    include: { reviews: { orderBy: { createdAt: "desc" } } },
   });
   if (!product || product.shopId !== shop.id) notFound();
+
+  const pendingReviews = product.reviews.filter((r) => r.status === "PENDING");
+  const approvedReviews = product.reviews.filter((r) => r.status === "APPROVED");
 
   const freeUsed = await prisma.product.count({
     where: { shopId: shop.id, isFreeSlot: true },
@@ -133,12 +141,80 @@ export default async function ArticleDetailPage({
           title: product.title,
           description: product.description,
           price: product.price,
+          oldPrice: product.oldPrice,
+          lowStock: product.lowStock,
           images: parseImages(product.images),
         }}
       />
 
+      {/* Avis */}
+      <h2 className="mt-8 text-lg font-semibold">
+        Avis clients ({approvedReviews.length} publié
+        {approvedReviews.length > 1 ? "s" : ""})
+      </h2>
+
+      {pendingReviews.length > 0 && (
+        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-medium text-amber-900">
+            {pendingReviews.length} avis en attente de validation
+          </p>
+          <div className="mt-3 space-y-3">
+            {pendingReviews.map((r) => (
+              <div key={r.id} className="rounded-lg border border-amber-200 bg-white p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{r.authorName}</span>
+                    <Stars rating={r.rating} className="text-sm" />
+                  </div>
+                  <span className="text-xs text-gray-400">{formatDate(r.createdAt)}</span>
+                </div>
+                {r.comment && <p className="mt-1 text-sm text-gray-700">{r.comment}</p>}
+                <div className="mt-2 flex gap-2">
+                  <form action={moderateReviewAction}>
+                    <input type="hidden" name="id" value={r.id} />
+                    <input type="hidden" name="action" value="APPROVED" />
+                    <button className="btn-primary py-1 text-xs">Publier</button>
+                  </form>
+                  <form action={moderateReviewAction}>
+                    <input type="hidden" name="id" value={r.id} />
+                    <input type="hidden" name="action" value="DELETE" />
+                    <button className="btn-danger py-1 text-xs">Rejeter</button>
+                  </form>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {approvedReviews.length > 0 && (
+        <div className="mt-3 space-y-3">
+          {approvedReviews.map((r) => (
+            <div key={r.id} className="card">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{r.authorName}</span>
+                  <Stars rating={r.rating} className="text-sm" />
+                  {r.source === "VENDOR" && (
+                    <span className="badge bg-gray-100 text-gray-600">ajouté par vous</span>
+                  )}
+                </div>
+                <form action={moderateReviewAction}>
+                  <input type="hidden" name="id" value={r.id} />
+                  <input type="hidden" name="action" value="DELETE" />
+                  <button className="text-xs text-red-600 hover:underline">Supprimer</button>
+                </form>
+              </div>
+              {r.comment && <p className="mt-1 text-sm text-gray-700">{r.comment}</p>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <AddReviewForm productId={product.id} />
+
       {/* Suppression */}
-      <form action={deleteProductAction} className="mt-6">
+      <form action={deleteProductAction} className="mt-8">
         <input type="hidden" name="id" value={product.id} />
         <button type="submit" className="btn-danger">
           Supprimer cet article

@@ -2,14 +2,22 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { formatFCFA, parseImages } from "@/lib/format";
+import { formatFCFA, parseImages, discountPercent, averageRating } from "@/lib/format";
+import { Stars } from "@/components/Stars";
 import { OrderForm } from "./OrderForm";
+import { CustomerReviewForm } from "./CustomerReviewForm";
 
 async function getProduct(shopSlug: string, productSlug: string) {
   const shop = await prisma.shop.findUnique({ where: { slug: shopSlug } });
   if (!shop || !shop.isActive) return null;
   const product = await prisma.product.findUnique({
     where: { shopId_slug: { shopId: shop.id, slug: productSlug } },
+    include: {
+      reviews: {
+        where: { status: "APPROVED" },
+        orderBy: { createdAt: "desc" },
+      },
+    },
   });
   if (!product || product.status !== "PUBLISHED") return null;
   return { shop, product };
@@ -38,6 +46,9 @@ export default async function PublicProductPage({
   const { shop, product } = data;
   const images = parseImages(product.images);
   const color = shop.primaryColor || "#0c9051";
+  const reviews = product.reviews;
+  const avg = averageRating(reviews);
+  const discount = product.oldPrice ? discountPercent(product.oldPrice, product.price) : 0;
 
   return (
     <div className="min-h-screen">
@@ -82,9 +93,40 @@ export default async function PublicProductPage({
             )}
 
             <h1 className="mt-5 text-2xl font-bold">{product.title}</h1>
-            <p className="mt-2 text-2xl font-extrabold" style={{ color }}>
-              {formatFCFA(product.price)}
-            </p>
+
+            {reviews.length > 0 && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                <Stars rating={avg} />
+                <span>
+                  {avg.toString().replace(".", ",")} · {reviews.length} avis
+                </span>
+              </div>
+            )}
+
+            <div className="mt-3 flex flex-wrap items-baseline gap-3">
+              <span className="text-3xl font-extrabold" style={{ color }}>
+                {formatFCFA(product.price)}
+              </span>
+              {product.oldPrice && (
+                <>
+                  <span className="text-lg text-gray-400 line-through">
+                    {formatFCFA(product.oldPrice)}
+                  </span>
+                  {discount > 0 && (
+                    <span className="badge bg-red-600 text-white">-{discount} %</span>
+                  )}
+                </>
+              )}
+            </div>
+
+            {product.lowStock && (
+              <div className="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3">
+                <p className="text-sm font-semibold text-orange-800">
+                  ⚡ Stock limité — commandez vite avant rupture
+                </p>
+              </div>
+            )}
+
             {product.description && (
               <p className="mt-4 whitespace-pre-line text-gray-600">
                 {product.description}
@@ -97,6 +139,58 @@ export default async function PublicProductPage({
             <OrderForm productId={product.id} color={color} />
           </div>
         </div>
+
+        {/* Avis clients */}
+        <section className="mt-12">
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-xl font-bold">Avis clients</h2>
+            {reviews.length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Stars rating={avg} />
+                <span>
+                  {avg.toString().replace(".", ",")} / 5 · {reviews.length} avis
+                </span>
+              </div>
+            )}
+          </div>
+
+          {reviews.length > 0 ? (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {reviews.map((r) => (
+                <article key={r.id} className="card">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white"
+                      style={{ backgroundColor: color }}
+                    >
+                      {r.authorName.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{r.authorName}</p>
+                      <p className="text-xs" style={{ color }}>
+                        ✓ Avis vérifié
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <Stars rating={r.rating} className="text-sm" />
+                  </div>
+                  {r.comment && (
+                    <p className="mt-2 text-sm text-gray-700">{r.comment}</p>
+                  )}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-gray-500">
+              Aucun avis pour le moment. Soyez le premier à en laisser un !
+            </p>
+          )}
+
+          <div className="mt-6 max-w-md">
+            <CustomerReviewForm productId={product.id} color={color} />
+          </div>
+        </section>
       </main>
 
       <footer className="mt-8 border-t border-gray-200 bg-white">

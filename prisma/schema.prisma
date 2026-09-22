@@ -52,16 +52,37 @@ model Product {
   slug        String
   description String?
   price       Int                     // prix affiché au client, en F CFA (entier)
+  oldPrice    Int?                    // ancien prix (pour prix barré + réduction)
   images      String    @default("[]") // JSON: tableau d'URLs d'images
   status      String    @default("DRAFT")
   isFreeSlot  Boolean   @default(false) // true si publié via le crédit gratuit
+  lowStock    Boolean   @default(false) // affiche le bandeau "stock limité"
   createdAt   DateTime  @default(now())
 
   shop        Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
   orders      Order[]
   payments    Payment[]
+  reviews     Review[]
 
   @@unique([shopId, slug])
+  @@index([status])
+}
+
+// Statut avis : "PENDING" | "APPROVED" | "REJECTED"
+// Source : "VENDOR" (ajouté par le vendeur) | "CUSTOMER" (laissé par un client)
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  authorName String
+  rating     Int                       // note de 1 à 5
+  comment    String?
+  source     String   @default("CUSTOMER")
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
   @@index([status])
 }
 

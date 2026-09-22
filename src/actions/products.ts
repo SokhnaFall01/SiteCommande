@@ -17,8 +17,16 @@ const productSchema = z.object({
   title: z.string().min(2, "Titre trop court"),
   description: z.string().optional(),
   price: z.coerce.number().int().min(0, "Prix invalide"),
+  oldPrice: z.coerce.number().int().min(0).optional(),
+  lowStock: z.boolean().optional(),
   images: z.string().optional(),
 });
+
+// L'ancien prix n'est retenu que s'il est supérieur au prix actuel.
+function cleanOldPrice(oldPrice: number | undefined, price: number): number | null {
+  if (!oldPrice || oldPrice <= price) return null;
+  return oldPrice;
+}
 
 function parseImageList(raw?: string): string[] {
   if (!raw) return [];
@@ -65,6 +73,8 @@ export async function createProductAction(
     title: formData.get("title"),
     description: formData.get("description") || undefined,
     price: formData.get("price"),
+    oldPrice: formData.get("oldPrice") || undefined,
+    lowStock: formData.get("lowStock") === "on",
     images: formData.get("images") || undefined,
   });
   if (!parsed.success) {
@@ -79,6 +89,8 @@ export async function createProductAction(
       slug,
       description: parsed.data.description?.trim() || null,
       price: parsed.data.price,
+      oldPrice: cleanOldPrice(parsed.data.oldPrice, parsed.data.price),
+      lowStock: parsed.data.lowStock ?? false,
       images: JSON.stringify(parseImageList(parsed.data.images)),
       status: "DRAFT",
     },
@@ -105,6 +117,8 @@ export async function updateProductAction(
     title: formData.get("title"),
     description: formData.get("description") || undefined,
     price: formData.get("price"),
+    oldPrice: formData.get("oldPrice") || undefined,
+    lowStock: formData.get("lowStock") === "on",
     images: formData.get("images") || undefined,
   });
   if (!parsed.success) {
@@ -117,6 +131,8 @@ export async function updateProductAction(
       title: parsed.data.title.trim(),
       description: parsed.data.description?.trim() || null,
       price: parsed.data.price,
+      oldPrice: cleanOldPrice(parsed.data.oldPrice, parsed.data.price),
+      lowStock: parsed.data.lowStock ?? false,
       images: JSON.stringify(parseImageList(parsed.data.images)),
     },
   });

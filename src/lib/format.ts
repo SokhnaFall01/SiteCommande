@@ -44,3 +44,16 @@ export function parseImages(json: string | null | undefined): string[] {
 export function isValidImageSrc(src: string): boolean {
   return /^https?:\/\//i.test(src) || /^\/uploads\/[\w.\-]+$/.test(src);
 }
+
+// Pourcentage de réduction entre l'ancien prix et le prix actuel.
+export function discountPercent(oldPrice: number, price: number): number {
+  if (!oldPrice || oldPrice <= price) return 0;
+  return Math.round(((oldPrice - price) / oldPrice) * 100);
+}
+
+// Moyenne des notes d'une liste d'avis (arrondie à 1 décimale).
+export function averageRating(reviews: { rating: number }[]): number {
+  if (reviews.length === 0) return 0;
+  const sum = reviews.reduce((s, r) => s + r.rating, 0);
+  return Math.round((sum / reviews.length) * 10) / 10;
+}

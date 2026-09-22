@@ -13,6 +13,8 @@ type Product = {
   title: string;
   description: string | null;
   price: number;
+  oldPrice: number | null;
+  lowStock: boolean;
   images: string[];
 };
 
@@ -64,21 +66,50 @@ export function ProductForm({ product }: { product?: Product }) {
         />
       </div>
 
-      <div>
-        <label className="label" htmlFor="price">
-          Prix (F CFA)
-        </label>
-        <input
-          id="price"
-          name="price"
-          type="number"
-          min={0}
-          required
-          className="input"
-          defaultValue={product?.price ?? ""}
-          placeholder="15000"
-        />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className="label" htmlFor="price">
+            Prix (F CFA)
+          </label>
+          <input
+            id="price"
+            name="price"
+            type="number"
+            min={0}
+            required
+            className="input"
+            defaultValue={product?.price ?? ""}
+            placeholder="15000"
+          />
+        </div>
+        <div>
+          <label className="label" htmlFor="oldPrice">
+            Ancien prix <span className="text-gray-400">(facultatif)</span>
+          </label>
+          <input
+            id="oldPrice"
+            name="oldPrice"
+            type="number"
+            min={0}
+            className="input"
+            defaultValue={product?.oldPrice ?? ""}
+            placeholder="20000"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            S&apos;il est supérieur au prix, il s&apos;affiche barré avec la réduction.
+          </p>
+        </div>
       </div>
+
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          name="lowStock"
+          defaultChecked={product?.lowStock ?? false}
+          className="h-4 w-4 rounded border-gray-300"
+        />
+        Afficher le bandeau <strong>« Stock limité »</strong> sur la page
+      </label>
 
       <div>
         <label className="label">
