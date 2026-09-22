@@ -13,6 +13,7 @@ import { ProductStatusBadge } from "@/components/badges";
 import { CopyLink } from "@/components/CopyLink";
 import { Stars } from "@/components/Stars";
 import { AddReviewForm } from "./AddReviewForm";
+import { VerifyPaymentButton } from "./VerifyPaymentButton";
 import { moderateReviewAction } from "@/actions/reviews";
 import { formatDate } from "@/lib/format";
 
@@ -41,6 +42,15 @@ export default async function ArticleDetailPage({
   });
   const willBeFree = freeUsed === 0;
   const publicUrl = `${config.appUrl}/b/${shop.slug}/${product.slug}`;
+
+  // Paiement en attente pour cet article (pour la vérification manuelle/auto)
+  const pendingPayment =
+    product.status === "PENDING_PAYMENT"
+      ? await prisma.payment.findFirst({
+          where: { productId: product.id, status: "PENDING" },
+          orderBy: { createdAt: "desc" },
+        })
+      : null;
 
   return (
     <div>
@@ -88,6 +98,28 @@ export default async function ArticleDetailPage({
             >
               Ouvrir la page publique ↗
             </a>
+          </>
+        ) : product.status === "PENDING_PAYMENT" ? (
+          <>
+            <h2 className="font-semibold">Paiement en attente de confirmation</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Si vous venez de payer, cliquez pour confirmer et publier
+              l&apos;article. La confirmation peut prendre quelques secondes.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              {pendingPayment && (
+                <VerifyPaymentButton
+                  paymentId={pendingPayment.id}
+                  auto={searchParams.paiement === "retour"}
+                />
+              )}
+              <form action={publishProductAction}>
+                <input type="hidden" name="id" value={product.id} />
+                <button type="submit" className="btn-outline">
+                  Relancer le paiement
+                </button>
+              </form>
+            </div>
           </>
         ) : (
           <>

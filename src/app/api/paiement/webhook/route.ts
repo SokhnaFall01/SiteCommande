@@ -3,11 +3,35 @@ import { prisma } from "@/lib/prisma";
 import { getPaymentProvider } from "@/lib/payment";
 import { confirmPayment, markPaymentFailed } from "@/actions/products";
 
+// Transforme des clés de formulaire "a[b][c]" en objet imbriqué { a: { b: { c } } }.
+function expandBracketKeys(form: FormData): Record<string, unknown> {
+  const root: Record<string, unknown> = {};
+  for (const [key, value] of form.entries()) {
+    const parts = key
+      .replace(/\]/g, "")
+      .split("[")
+      .filter(Boolean);
+    let node: Record<string, unknown> = root;
+    parts.forEach((part, i) => {
+      if (i === parts.length - 1) {
+        node[part] = typeof value === "string" ? value : String(value);
+      } else {
+        if (typeof node[part] !== "object" || node[part] === null) {
+          node[part] = {};
+        }
+        node = node[part] as Record<string, unknown>;
+      }
+    });
+  }
+  return root;
+}
+
 // Webhook (IPN) appelé par le fournisseur de paiement (PayDunya).
 export async function POST(req: NextRequest) {
   const provider = getPaymentProvider();
 
   // Le corps peut être du JSON ou du form-urlencoded selon le fournisseur.
+  // PayDunya envoie des clés imbriquées façon data[status], data[custom_data][paymentId]…
   let body: unknown = {};
   const contentType = req.headers.get("content-type") || "";
   try {
@@ -15,7 +39,7 @@ export async function POST(req: NextRequest) {
       body = await req.json();
     } else {
       const form = await req.formData();
-      body = Object.fromEntries(form.entries());
+      body = expandBracketKeys(form);
     }
   } catch {
     body = {};

@@ -3,6 +3,7 @@ import type {
   CheckoutParams,
   CheckoutResult,
   PaymentProvider,
+  PaymentStatus,
   WebhookResult,
 } from "./types";
 
@@ -65,6 +66,30 @@ export class PayDunyaProvider implements PaymentProvider {
         : `https://paydunya.com/checkout/invoice/${data.token}`;
 
     return { checkoutUrl, providerRef: data.token };
+  }
+
+  async verifyPayment(token: string): Promise<PaymentStatus> {
+    if (!token) return "PENDING";
+    try {
+      const res = await fetch(`${this.baseUrl}/checkout-invoice/confirm/${token}`, {
+        method: "GET",
+        headers: this.headers,
+      });
+      const data = (await res.json()) as {
+        status?: string;
+        invoice?: { status?: string };
+      };
+      const status = data.status || data.invoice?.status || "";
+      return status === "completed"
+        ? "PAID"
+        : status === "cancelled"
+          ? "CANCELLED"
+          : status === "failed"
+            ? "FAILED"
+            : "PENDING";
+    } catch {
+      return "PENDING";
+    }
   }
 
   async parseWebhook(body: unknown): Promise<WebhookResult | null> {

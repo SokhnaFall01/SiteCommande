@@ -3,6 +3,7 @@ import type {
   CheckoutParams,
   CheckoutResult,
   PaymentProvider,
+  PaymentStatus,
   WebhookResult,
 } from "./types";
 
@@ -18,6 +19,11 @@ export class MockProvider implements PaymentProvider {
       ref
     )}&pid=${encodeURIComponent(params.paymentId)}`;
     return { checkoutUrl: url, providerRef: ref };
+  }
+
+  async verifyPayment(): Promise<PaymentStatus> {
+    // En mode test, on considère le paiement comme réussi.
+    return "PAID";
   }
 
   async parseWebhook(body: unknown): Promise<WebhookResult | null> {

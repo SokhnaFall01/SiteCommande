@@ -22,8 +22,13 @@ export type WebhookResult = {
   status: "PAID" | "FAILED" | "CANCELLED" | "PENDING";
 };
 
+export type PaymentStatus = "PAID" | "FAILED" | "CANCELLED" | "PENDING";
+
 export interface PaymentProvider {
   readonly name: string;
   createCheckout(params: CheckoutParams): Promise<CheckoutResult>;
   parseWebhook(body: unknown, headers: Headers): Promise<WebhookResult | null>;
+  // Interroge le fournisseur pour connaître le statut réel d'un paiement,
+  // à partir de sa référence (token). Sert à la vérification "au retour".
+  verifyPayment(providerRef: string): Promise<PaymentStatus>;
 }

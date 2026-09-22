@@ -249,6 +249,31 @@ export async function confirmPayment(paymentId: string): Promise<void> {
   await sendMail({ to: payment.user.email, ...mail });
 }
 
+// Vérifie auprès du fournisseur si un paiement en attente a été réglé, et
+// publie l'article le cas échéant. Ne dépend pas du webhook.
+export async function verifyPaymentAction(formData: FormData): Promise<void> {
+  const { user, shop } = await requireShop();
+  if (!shop) redirect("/dashboard/boutique");
+
+  const paymentId = String(formData.get("paymentId") || "");
+  const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
+  if (!payment || payment.userId !== user.id) {
+    redirect("/dashboard/articles");
+  }
+
+  if (payment.status !== "PAID" && payment.providerRef) {
+    const provider = getPaymentProvider();
+    const status = await provider.verifyPayment(payment.providerRef);
+    if (status === "PAID") {
+      await confirmPayment(payment.id);
+    } else if (status === "FAILED" || status === "CANCELLED") {
+      await markPaymentFailed(payment.id, status);
+    }
+  }
+
+  redirect(`/dashboard/articles/${payment.productId}`);
+}
+
 export async function markPaymentFailed(
   paymentId: string,
   status: "FAILED" | "CANCELLED"
