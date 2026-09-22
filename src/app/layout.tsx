@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SiteCommande — Ouvrez votre boutique en ligne",
+  title: "SamaBoutik — Tout ce dont vous avez besoin",
   description:
     "Créez votre compte, ouvrez votre boutique, publiez vos articles et recevez vos commandes par un simple lien à partager.",
 };

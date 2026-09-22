@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { config } from "@/lib/config";
 import { formatFCFA } from "@/lib/format";
+import { Wordmark } from "@/components/Wordmark";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -10,8 +11,8 @@ export default async function HomePage() {
     <div>
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <Link href="/" className="text-lg font-bold text-brand-700">
-            SiteCommande
+          <Link href="/">
+            <Wordmark className="text-xl" />
           </Link>
           <nav className="flex items-center gap-3 text-sm">
             {user ? (
@@ -37,7 +38,11 @@ export default async function HomePage() {
 
       <main>
         <section className="mx-auto max-w-5xl px-4 py-16 text-center">
-          <span className="badge bg-brand-100 text-brand-800">
+          <Wordmark className="text-5xl sm:text-6xl" />
+          <p className="mt-2 text-sm font-medium uppercase tracking-[0.2em] text-gold-600">
+            Tout ce dont vous avez besoin
+          </p>
+          <span className="mt-6 inline-block badge bg-brand-100 text-brand-800">
             Simple · Rapide · Sénégal 🇸🇳
           </span>
           <h1 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl">
@@ -97,7 +102,7 @@ export default async function HomePage() {
 
       <footer className="border-t border-gray-200 bg-white">
         <div className="mx-auto max-w-5xl px-4 py-6 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} SiteCommande
+          © {new Date().getFullYear()} <Wordmark className="text-sm" />
         </div>
       </footer>
     </div>

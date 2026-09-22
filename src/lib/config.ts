@@ -34,7 +34,7 @@ export const config = {
     from:
       process.env.SMTP_FROM ||
       (process.env.SMTP_USER
-        ? `SiteCommande <${process.env.SMTP_USER}>`
-        : "SiteCommande <no-reply@sitecommande.sn>"),
+        ? `SamaBoutik <${process.env.SMTP_USER}>`
+        : "SamaBoutik <no-reply@samaboutik.sn>"),
   },
 };

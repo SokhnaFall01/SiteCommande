@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useFormState } from "react-dom";
 import { signupAction } from "@/actions/auth";
 import { SubmitButton } from "@/components/SubmitButton";
+import { Wordmark } from "@/components/Wordmark";
 
 export default function SignupPage() {
   const [state, formAction] = useFormState(signupAction, undefined);
@@ -11,8 +12,8 @@ export default function SignupPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4">
       <div className="card">
-        <Link href="/" className="text-lg font-bold text-brand-700">
-          SiteCommande
+        <Link href="/">
+          <Wordmark className="text-xl" />
         </Link>
         <h1 className="mt-4 text-2xl font-bold">Créer ma boutique</h1>
         <p className="mt-1 text-sm text-gray-600">

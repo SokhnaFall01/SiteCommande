@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { formatFCFA, parseImages, discountPercent, averageRating } from "@/lib/format";
 import { Stars } from "@/components/Stars";
+import { Wordmark } from "@/components/Wordmark";
 import { OrderForm } from "./OrderForm";
 import { CustomerReviewForm } from "./CustomerReviewForm";
 
@@ -196,8 +197,8 @@ export default async function PublicProductPage({
       <footer className="mt-8 border-t border-gray-200 bg-white">
         <div className="mx-auto max-w-4xl px-4 py-6 text-center text-sm text-gray-500">
           Propulsé par{" "}
-          <Link href="/" className="font-medium text-brand-700">
-            SiteCommande
+          <Link href="/">
+            <Wordmark className="text-sm" />
           </Link>
         </div>
       </footer>

@@ -32,7 +32,7 @@ export class PayDunyaProvider implements PaymentProvider {
         total_amount: params.amount,
         description: params.description,
       },
-      store: { name: "SiteCommande" },
+      store: { name: "SamaBoutik" },
       custom_data: { paymentId: params.paymentId },
       actions: {
         cancel_url: params.cancelUrl,
