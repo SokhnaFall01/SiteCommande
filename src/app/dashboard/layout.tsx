@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { logoutAction } from "@/actions/auth";
 import { NavLink } from "@/components/NavLink";
-import { Wordmark } from "@/components/Wordmark";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default async function DashboardLayout({
   children,
@@ -15,7 +15,7 @@ export default async function DashboardLayout({
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col md:flex-row">
       <aside className="border-b border-gray-200 bg-white p-4 md:w-64 md:border-b-0 md:border-r">
         <Link href="/">
-          <Wordmark className="text-xl" />
+          <BrandLogo className="text-lg" markSize={32} />
         </Link>
         <p className="mt-1 truncate text-xs text-gray-500">{user.email}</p>
 

@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { config } from "@/lib/config";
 import { formatFCFA } from "@/lib/format";
 import { Wordmark } from "@/components/Wordmark";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default async function HomePage() {
   const user = await getCurrentUser();
@@ -12,7 +13,7 @@ export default async function HomePage() {
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <Link href="/">
-            <Wordmark className="text-xl" />
+            <BrandLogo className="text-xl" />
           </Link>
           <nav className="flex items-center gap-3 text-sm">
             {user ? (
@@ -38,10 +39,12 @@ export default async function HomePage() {
 
       <main>
         <section className="mx-auto max-w-5xl px-4 py-16 text-center">
-          <Wordmark className="text-5xl sm:text-6xl" />
-          <p className="mt-2 text-sm font-medium uppercase tracking-[0.2em] text-gold-600">
-            Tout ce dont vous avez besoin
-          </p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="SamaBoutik — Tout ce dont vous avez besoin"
+            className="mx-auto w-full max-w-xs"
+          />
           <span className="mt-6 inline-block badge bg-brand-100 text-brand-800">
             Simple · Rapide · Sénégal 🇸🇳
           </span>
