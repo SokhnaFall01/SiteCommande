@@ -17,11 +17,22 @@ services:
       sh -c "npx prisma db push --skip-generate &&
              npx tsx prisma/seed.ts &&
              npm run start"
-    # Exposé UNIQUEMENT en local : seul le reverse proxy du serveur y accède.
-    # Change APP_PORT dans .env si 3001 est déjà pris par un autre conteneur.
+    # Exposé en local (pratique pour tester avec curl). Optionnel : le reverse
+    # proxy, lui, joint l'app par le réseau Docker ci-dessous.
     ports:
       - "127.0.0.1:${APP_PORT:-3001}:3000"
+    # Rejoint le réseau du reverse proxy Caddy ; joignable par l'alias "samaboutik".
+    networks:
+      proxy:
+        aliases:
+          - samaboutik
 
 volumes:
   db_data:
   uploads_data:
+
+networks:
+  # Réseau existant du conteneur Caddy (projet radia-glam)
+  proxy:
+    external: true
+    name: radia-glam_default
