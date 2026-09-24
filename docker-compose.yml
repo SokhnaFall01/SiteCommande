@@ -1,38 +1,41 @@
+# Déploiement AUTONOME de SamaBoutik sur un serveur dédié.
+# Inclut son propre reverse proxy Caddy (HTTPS automatique) : aucune dépendance
+# à un autre projet. Renseigne DOMAIN et APP_URL dans .env.
 services:
   app:
     build: .
     restart: unless-stopped
-    # Variables lues depuis le fichier .env (APP_URL, SESSION_SECRET, SMTP_*,
-    # PAYDUNYA_*, PAYMENT_PROVIDER, etc.)
     env_file: .env
     environment:
       NODE_ENV: "production"
-      # Base SQLite stockée sur un volume persistant
       DATABASE_URL: "file:/app/data/prod.db"
     volumes:
       - db_data:/app/data                 # base de données SQLite
       - uploads_data:/app/public/uploads  # photos uploadées
-    # Au démarrage : crée/MAJ les tables, crée l'admin si absent, puis lance l'app
     command: >
       sh -c "npx prisma db push --skip-generate &&
              npx tsx prisma/seed.ts &&
              npm run start"
-    # Exposé en local (pratique pour tester avec curl). Optionnel : le reverse
-    # proxy, lui, joint l'app par le réseau Docker ci-dessous.
+    expose:
+      - "3000"   # interne : joint par Caddy, non exposé publiquement
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      DOMAIN: "${DOMAIN}"
     ports:
-      - "127.0.0.1:${APP_PORT:-3001}:3000"
-    # Rejoint le réseau du reverse proxy Caddy ; joignable par l'alias "samaboutik".
-    networks:
-      proxy:
-        aliases:
-          - samaboutik
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
 
 volumes:
   db_data:
   uploads_data:
-
-networks:
-  # Réseau existant du conteneur Caddy (projet radia-glam)
-  proxy:
-    external: true
-    name: radia-glam_default
+  caddy_data:
+  caddy_config:

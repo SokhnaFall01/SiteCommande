@@ -74,18 +74,19 @@ en **Publié** sans transaction réelle.
 4. **APP_URL** : mettez l'URL publique réelle (pour les liens et le webhook).
 5. **Build** : `npm run build && npm run start`.
 
-### Avec Docker (recommandé)
+### Avec Docker (serveur dédié — recommandé)
 
-Un seul conteneur (SQLite + volumes pour la base et les photos), exposé en local
-sur `127.0.0.1:${APP_PORT:-3001}` pour être placé derrière votre reverse proxy.
+Déploiement autonome : l'application (SQLite + volumes) **et son propre Caddy**
+(HTTPS automatique). Renseignez `DOMAIN` et `APP_URL` dans `.env`.
 
 ```bash
-cp .env.example .env   # puis éditez (APP_URL, APP_PORT, secrets…)
+cp .env.example .env   # éditez DOMAIN, APP_URL, secrets…
 docker compose up -d --build
 ```
 
-La base et le compte admin sont créés automatiquement au démarrage.
-Détails (DNS, Nginx/Caddy/Traefik, HTTPS, sauvegardes) : [`docs/DEPLOIEMENT.md`](./docs/DEPLOIEMENT.md).
+Caddy gère le certificat HTTPS tout seul. La base et le compte admin sont créés
+automatiquement au démarrage. Guide complet (DNS, migration de données,
+sauvegardes) : [`docs/DEPLOIEMENT.md`](./docs/DEPLOIEMENT.md).
 
 ## Structure
 

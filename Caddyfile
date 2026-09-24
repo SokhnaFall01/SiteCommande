@@ -1,0 +1,7 @@
+# Caddy pour un serveur DÉDIÉ à SamaBoutik.
+# Le domaine est lu depuis la variable d'environnement DOMAIN (voir .env).
+# Caddy gère le certificat HTTPS automatiquement.
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy app:3000
+}
