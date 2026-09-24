@@ -1,6 +1,11 @@
-# Déploiement AUTONOME de SamaBoutik sur un serveur dédié.
-# Inclut son propre reverse proxy Caddy (HTTPS automatique) : aucune dépendance
-# à un autre projet. Renseigne DOMAIN et APP_URL dans .env.
+# SamaBoutik — application seule, à brancher derrière un reverse proxy Caddy
+# DÉJÀ présent sur le serveur (partagé avec d'autres conteneurs).
+#
+# Le proxy joint l'app par le réseau Docker, via l'alias "samaboutik".
+# Renseigne PROXY_NETWORK (le réseau du conteneur Caddy existant) dans .env.
+#
+# 👉 Serveur DÉDIÉ sans reverse proxy existant ? Utilise plutôt
+#    docker-compose.standalone.yml (Caddy intégré).
 services:
   app:
     build: .
@@ -17,25 +22,18 @@ services:
              npx tsx prisma/seed.ts &&
              npm run start"
     expose:
-      - "3000"   # interne : joint par Caddy, non exposé publiquement
-
-  caddy:
-    image: caddy:2-alpine
-    restart: unless-stopped
-    depends_on:
-      - app
-    environment:
-      DOMAIN: "${DOMAIN}"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
+      - "3000"   # interne : joint par le Caddy existant, non exposé publiquement
+    networks:
+      proxy:
+        aliases:
+          - samaboutik
 
 volumes:
   db_data:
   uploads_data:
-  caddy_data:
-  caddy_config:
+
+networks:
+  # Réseau du conteneur Caddy DÉJÀ présent (à définir dans .env : PROXY_NETWORK)
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-proxy_default}

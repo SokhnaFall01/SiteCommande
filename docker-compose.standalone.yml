@@ -1,0 +1,41 @@
+# SamaBoutik AUTONOME : inclut son propre Caddy (HTTPS auto).
+# À utiliser UNIQUEMENT sur un serveur dédié SANS autre reverse proxy sur 80/443.
+# Lancer avec : docker compose -f docker-compose.standalone.yml up -d --build
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: "production"
+      DATABASE_URL: "file:/app/data/prod.db"
+    volumes:
+      - db_data:/app/data
+      - uploads_data:/app/public/uploads
+    command: >
+      sh -c "npx prisma db push --skip-generate &&
+             npx tsx prisma/seed.ts &&
+             npm run start"
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      DOMAIN: "${DOMAIN}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  db_data:
+  uploads_data:
+  caddy_data:
+  caddy_config:
